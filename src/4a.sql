@@ -2,12 +2,12 @@
 -- population ratio within the provided range. Also, show the most frequent crime type in each of these neighborhoods.
 
 -- do not consider the neighbourhoods which do not have a reported population
+-- filter out zero longitude and latitude
 
--- args are in the format [a, b], n
+-- args are in the format year range [a, b], (top) n
 
-  SELECT reviewer 
-    FROM reviews 
-GROUP BY reviewer 
-  HAVING COUNT(*) >= ? 
-     AND COUNT(*) <= ?;
+-- filter by empty population / zero longitude-latitude, ratio (descending)
 
+SELECT "Neighbourhood_Name", 
+
+"Incidents_Count" / ("CANADIAN_CITIZEN" + "NON_CANADIAN_CITIZEN" + "NO_RESPONSE")

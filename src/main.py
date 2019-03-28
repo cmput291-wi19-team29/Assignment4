@@ -68,15 +68,15 @@ def task4(conn):
 
     # read SQL
     try:
-        f = open('3a.sql','r')
+        f = open('4a.sql','r')
         sql = f.read()
         f.close()
     except Exception as e:
         print(e)
         return
 
-    # execute
-    args = (int(a), int(b))
+    # execute (fetch top-n neighborhoods)
+    args = (a, b, n)
     cur = conn.cursor()
     try:
         cur.execute(sql, args)
@@ -88,30 +88,6 @@ def task4(conn):
     print('\nResult:')
     for row in cur:
         print(row)
-
-    # special case for [0, X]
-    # display reviewers who did not review any papers
-    if int(a) == 0:
-        # read SQL
-        try:
-            f = open('3b.sql','r')
-            sql = f.read()
-            f.close()
-        except Exception as e:
-            print(e)
-            return
-
-        # execute
-        cur = conn.cursor()
-        try:
-            cur.execute(sql)
-        except sqlite3.Error as e:
-            print(e)
-            return
-
-        # print
-        for row in cur:
-            print(row)
 
 def main():
     # check for DB param

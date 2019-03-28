@@ -1,13 +1,7 @@
--- Given a range of years and an integer N, show (in a map) the Top-N neighborhoods with the highest crimes to 
--- population ratio within the provided range. Also, show the most frequent crime type in each of these neighborhoods.
+-- given a neighborhood, fetch the most frequent crime type in that area
 
--- do not consider the neighbourhoods which do not have a reported population
+-- args are: year range [a,b], neighborhood name
 
--- args are in the format [a, b], n
+-- filter by empty population / zero longitude-latitude, neighborhood, then by years, bin incidents by type (descending)
 
-  SELECT reviewer 
-    FROM reviews 
-GROUP BY reviewer 
-  HAVING COUNT(*) >= ? 
-     AND COUNT(*) <= ?;
-
+SELECT 
