@@ -8,11 +8,17 @@ import folium
 import sys
 import time
 
+# check if a variable is an integer
+def isInt(x):
+    try:
+        int(x)
+        return True
+    except:
+        return False
 
 # clear screen
 def clear():
-    os.system('cls' if os.name == 'nt' else 'clear')
- 
+    os.system('cls' if os.name == 'nt' else 'clear') 
  
 def task1(conn):
     # notify
@@ -29,7 +35,84 @@ def task3(conn):
 def task4(conn):
     # notify
     print('Running task 4\n')
+
+    # get the interval of years [a, b]
+    print('Enter years for the interval [a, b]')
+    a = input('a: ')
+    b = input('b: ')
+
+    # validate
+    if not ( isInt(a) and isInt(b) ):
+        print('Error: a,b must be integers')
+        return
+
+    b = int(b)
+    a = int(a)
     
+    if b < a:
+        print('Error: b cannot be less than a')
+        return
+
+    # get N for top-n neighborhoods
+    print('Enter n to display the top-n neighborhoods')
+    n = input('n: ')
+
+    # validate
+    if not isInt(n):
+        print('Error: n must be an integer')
+    
+    n = int(n)
+
+    if n < 0:
+        print('Error: n must be positive')
+
+    # read SQL
+    try:
+        f = open('3a.sql','r')
+        sql = f.read()
+        f.close()
+    except Exception as e:
+        print(e)
+        return
+
+    # execute
+    args = (int(a), int(b))
+    cur = conn.cursor()
+    try:
+        cur.execute(sql, args)
+    except sqlite3.Error as e:
+        print(e)
+        return
+
+    # print
+    print('\nResult:')
+    for row in cur:
+        print(row)
+
+    # special case for [0, X]
+    # display reviewers who did not review any papers
+    if int(a) == 0:
+        # read SQL
+        try:
+            f = open('3b.sql','r')
+            sql = f.read()
+            f.close()
+        except Exception as e:
+            print(e)
+            return
+
+        # execute
+        cur = conn.cursor()
+        try:
+            cur.execute(sql)
+        except sqlite3.Error as e:
+            print(e)
+            return
+
+        # print
+        for row in cur:
+            print(row)
+
 def main():
     # check for DB param
     if len(sys.argv) != 2:
@@ -73,7 +156,6 @@ def main():
             break
 
         # execute action
-        
         try:
             print('') # newline
             tasks[action](conn)
