@@ -65,7 +65,7 @@ def task1(conn):
 
     # save plot
     plt.savefig(crime+str(start_year)+"to"+str(end_year))
-    print("Saved the bar plot " + crime+str(start_year)+"to"+str(end_year)+ "  to your working directory.")
+    print("Saved the bar plot " + crime+str(start_year)+"to"+str(end_year)+ " to your working directory.")
 
     return
 
