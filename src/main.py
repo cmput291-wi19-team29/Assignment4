@@ -8,6 +8,20 @@ import folium
 import sys
 import time
 
+def get_valid_year(prompt):
+    # gets and validates inputs in the form of years
+    # - prompt is the string to use when asking the user for input
+
+    valid = False
+    while not valid:
+        year = input(prompt)
+        if not year.isnumeric():
+            print("Invalid year. Please enter the year as a number in YYYY format.")
+            continue
+        else:
+            year = int(year)
+            valid = True
+            return year
 
 # clear screen
 def clear():
@@ -17,7 +31,45 @@ def clear():
 def task1(conn):
     # notify
     print('Running task 1\n')
+    
+    # get input 
+    start_year = get_valid_year("Enter Start Year (YYYY): ")
+    end_year = get_valid_year("Enter End Year (YYYY): ")
+    crime = input("Enter Crime Type: ")
+    
+    # read query -- generate results of monthly crimes of the given type
+    # between the given years, inclusive
 
+    try:
+        query = open('1.sql','r')
+        sql = query.read()
+        query.close()
+
+    except Exception as e:
+        print(e)
+        return
+
+    try:
+        df = pd.read_sql_query(sql,conn,params=[start_year,end_year,crime])
+    except Exception as e:
+        print(e)
+        return
+    
+    # replace None with 0 
+    # (fixes No Numerical Data problem in the case of no results)
+    df.fillna(value=0,inplace=True)
+    
+    # generate bar chart 
+    plot = df.plot.bar(x="Month")
+    plt.plot()
+
+    # save plot
+    plt.savefig(crime+str(start_year)+"to"+str(end_year))
+    print("Saved the bar plot " + crime+str(start_year)+"to"+str(end_year)+ "  to your working directory.")
+
+    return
+
+  
 def task2(conn):
     # notify
     print('Running task 2\n')
@@ -61,7 +113,7 @@ def main():
         # display API
         print('\n--- ASSIGNMENT 4 PROGRAM ---')
         print('What do you want to know?')
-        print('[1] Q1')
+        print('[1] Bar Plot of Monthly Crimes in Year Range')
         print('[2] Q2')
         print('[3] Q3')
         print('[4] Q4')
