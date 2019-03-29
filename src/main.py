@@ -7,8 +7,20 @@ import os.path
 import folium
 import sys
 import time
+from datetime import date
 
-def get_valid_year(prompt):
+def count(fn):
+        # helps count the number of times a function has been called
+        # https://stackoverflow.com/questions/33312853/simple-way-to-count-the-number-of-times-def-fx-is-evaluated
+
+        def wrapper(*args, **kwargs):
+            wrapper.called+= 1
+            return fn(*args, **kwargs)
+        wrapper.called= 0
+        wrapper.__name__= fn.__name__
+        return wrapper
+
+def get_valid_year(prompt,min=0, max = date.today().year):
     # gets and validates inputs in the form of years
     # - prompt is the string to use when asking the user for input
 
@@ -20,6 +32,16 @@ def get_valid_year(prompt):
             continue
         else:
             year = int(year)
+            if year < min:
+                # note that negatives are caught earlier in this function
+                # because they have non-numeric characters
+                # therefore this will only apply when the user enters a backward range
+               
+                print("The end year cannot be smaller than the start year.")
+                continue
+            if year > max:
+                print("This year has not yet occured.")
+                continue
             valid = True
             return year
 
@@ -27,14 +49,14 @@ def get_valid_year(prompt):
 def clear():
     os.system('cls' if os.name == 'nt' else 'clear')
  
- 
+@count 
 def task1(conn):
     # notify
     print('Running task 1\n')
     
     # get input 
     start_year = get_valid_year("Enter Start Year (YYYY): ")
-    end_year = get_valid_year("Enter End Year (YYYY): ")
+    end_year = get_valid_year("Enter End Year (YYYY): ", min = start_year)
     crime = input("Enter Crime Type: ")
     
     # read query -- generate results of monthly crimes of the given type
@@ -62,10 +84,11 @@ def task1(conn):
     # generate bar chart 
     plot = df.plot.bar(x="Month")
     plt.plot()
-
+    plt.title("Total monthly incidents of "+crime+" from " + str(start_year)+" to "+str(end_year)
+)
     # save plot
-    plt.savefig(crime+str(start_year)+"to"+str(end_year))
-    print("Saved the bar plot " + crime+str(start_year)+"to"+str(end_year)+ " to your working directory.")
+    plt.savefig("Q1-"+str(task1.called))
+    print("\nSaved the bar plot " + "Q1-"+str(task1.called)+ " to your working directory.")
 
     return
 
@@ -107,6 +130,7 @@ def main():
     tasks['2'] = task2
     tasks['3'] = task3
     tasks['4'] = task4
+
 
     # message pump
     while(True):
