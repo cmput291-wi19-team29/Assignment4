@@ -19,7 +19,7 @@ def task1(conn):
     print('Running task 1\n')
 
 def task2(conn):
-    print('Mapping neighbourhood populations...\n')
+    print('Mapping neighbourhood populations...')
     
     try:
         query = open('2.sql', 'r')
@@ -38,7 +38,7 @@ def task2(conn):
     
     df = pd.DataFrame(cur.fetchall())
 
-    print("Enter number of locations: ")
+    print("Enter number of locations: ", end='')
     try:
         N = int(input())
         if N<=0:
@@ -109,8 +109,93 @@ def task2(conn):
     print("Map generated! > '%s%i.html'" % (prefix, i))
     
 def task3(conn):
-    # notify
-    print('Running task 3\n')   
+    print('Reading data...\n')
+
+    try:
+        query_a = open('3a.sql','r') # Main query
+        query_b = open('3b.sql','r') # Available crime types
+        query_c = open('3c.sql','r') # Available year range
+        sql_a = query_a.read()
+        sql_b = query_b.read()
+        sql_c = query_c.read()
+        query_a.close()
+        query_b.close()
+        query_c.close()
+    except Exception as e:
+        print(e)
+        return
+
+    # Extract the data from the extra queries
+    cur = conn.cursor()
+    try:
+        cur.execute(sql_b);
+        types = cur.fetchall()
+        crime_types = []
+        for t in types:
+            crime_types.append(t[0])
+        cur.execute(sql_c);
+        ranges = cur.fetchall()
+        min_year = ranges[0][0]
+        max_year = ranges[0][1]
+    except Exception as e:
+        print(e)
+        return
+
+    print('There is data from %i to %i.' % (min_year, max_year))
+    print('The types of crimes are:')
+    for crime in crime_types:
+        print(crime)
+    print()
+
+    # Could this be inside a loop instead?
+    try:
+        print('Enter start year (YYYY): \t', end='')
+        start = int(input())
+        if start < min_year:
+            raise Exception("Error: No data before that year!")
+        print('Enter end year (YYYY): \t\t', end='')
+        end = int(input())
+        if end > max_year:
+            raise Exception("Error: No data after that year!")
+        print('Enter crime type: \t\t', end='')
+        crime = input()
+        if crime not in crime_types:
+            raise Exception("Error: Crime not recognized.\nEnter the crime exactly as it appears above.\nRemember, it's case sensitive!")
+        print('Enter number of neighbourhoods: ', end='')
+        N = int(input())
+        if N <= 0:
+            raise Exception("Error: Please enter a valid number of neighbourhoods.")
+        #print(start, end, crime, N)
+    except Exception as e:
+        print(e)
+        return
+
+    # Now that we have all the parameters, execute the main query
+    try:
+        cur.execute(sql_a, (crime, start, end))
+    except Exception as e:
+        print(e)
+        return
+    df = pd.DataFrame(cur.fetchall())
+    #print(df)
+
+    # Filter the results
+    if len(df) > N:
+        # TOP N neighbourhoods. Check for ties.
+        bound = N-1
+        for i in range(N, len(df)):
+            #print("Checking ", i-1, i)
+            if df[2][i-1] != df[2][i]: # The crime counts are hardcoded to column 2...
+                break
+            else:
+                bound = i
+        top = df.iloc[0:bound+1,:]
+    else:
+        # There are fewer than N neighbourhoods, so just include all of them.
+        print("NOTE: There are only %i neighbourhoods; they will all be mapped.\n" % len(df))
+        top = df
+    
+    print(top)
     
 def task4(conn):
     # notify
