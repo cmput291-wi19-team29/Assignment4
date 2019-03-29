@@ -97,9 +97,16 @@ def task2(conn):
             fill_color='crimson'
         ).add_to(m)
 
-    filename = "2" # could also be changed or taken as input
-    m.save("%s.html" % filename)
-    print("Map generated! > '%s.html'" % filename)
+    # Search for an available filename and save the map to an HTML file
+    prefix = "Q2-"
+    i=1
+    while(True):
+        if os.path.isfile("%s%i.html" % (prefix, i)):
+            i+=1
+        else:
+            break
+    m.save("%s%i.html" % (prefix, i))
+    print("Map generated! > '%s%i.html'" % (prefix, i))
     
 def task3(conn):
     # notify
