@@ -129,9 +129,9 @@ def task3(conn):
     cur = conn.cursor()
     try:
         cur.execute(sql_b);
-        types = cur.fetchall()
+        types_raw = cur.fetchall()
         crime_types = []
-        for t in types:
+        for t in types_raw:
             crime_types.append(t[0])
         cur.execute(sql_c);
         ranges = cur.fetchall()
@@ -157,6 +157,8 @@ def task3(conn):
         end = int(input())
         if end > max_year:
             raise Exception("Error: No data after that year!")
+        if start > end:
+            raise Exception("Error: start year is greater than end year")
         print('Enter crime type: \t\t', end='')
         crime = input()
         if crime not in crime_types:
@@ -185,7 +187,7 @@ def task3(conn):
         bound = N-1
         for i in range(N, len(df)):
             #print("Checking ", i-1, i)
-            if df[2][i-1] != df[2][i]: # The crime counts are hardcoded to column 2...
+            if df[1][i-1] != df[1][i]: # The crime counts are hardcoded to column 2...
                 break
             else:
                 bound = i
@@ -194,8 +196,56 @@ def task3(conn):
         # There are fewer than N neighbourhoods, so just include all of them.
         print("NOTE: There are only %i neighbourhoods; they will all be mapped.\n" % len(df))
         top = df
+    print('\n', top, '\n')
     
-    print(top)
+    # Get coordinates for mapping
+    try:
+        query_d = open('3d.sql','r') # Neighbourhood coordinates
+        sql_d = query_d.read()
+        query_d.close()
+        cur.execute(sql_d);
+        coords = cur.fetchall()
+        #for c in coords:
+        #    print(c[0], c[1], c[2])
+    except Exception as e:
+        print(e)
+        print("Unable to map results!")
+        return
+
+    # Concatenate the crime statistics and the neighbourhood coordinates
+    results = []
+    for i in range(0, len(top)):
+        found = False
+        for c in coords:
+            if top[0][i] == c[0]:
+                # Match! We need these coordinates.
+                results.append( (top[0][i], c[1], c[2], top[1][i]) )
+                found = True
+                break
+        if not found:
+            print("Warning: no coordinates found for %s, it won't be mapped" % (top[0][i]))
+        
+    # Now map the results
+    m = folium.Map(location=[results[0][1], results[0][2]], zoom_start=12)
+    for neighbourhood in results:
+        folium.Circle(
+            location=[ neighbourhood[1], neighbourhood[2] ],
+            popup= "%s <br> %s: %i" % (neighbourhood[0], crime, neighbourhood[3]),
+            radius=int(neighbourhood[3])*2, # Multiplier can be adjusted
+            color='crimson',
+            fill=True,
+            fill_color='crimson'
+        ).add_to(m)
+    # Search for an available filename and save the map to an HTML file
+    prefix = "Q3-"
+    i=1
+    while(True):
+        if os.path.isfile("%s%i.html" % (prefix, i)):
+            i+=1
+        else:
+            break
+    m.save("%s%i.html" % (prefix, i))
+    print("Map generated! > '%s%i.html'" % (prefix, i))
     
 def task4(conn):
     # notify
@@ -234,7 +284,7 @@ def main():
         print('What do you want to know?')
         print('[1] Q1')
         print('[2] Map the most and least populous neighbourhoods')
-        print('[3] Q3')
+        print('[3] Map the occurences of a particular type of crime')
         print('[4] Q4')
         print('[E] Exit')
         action = input("Enter your choice: ")
