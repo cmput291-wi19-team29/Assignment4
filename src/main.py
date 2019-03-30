@@ -109,6 +109,7 @@ def task2(conn):
     print("Map generated! > '%s%i.html'" % (prefix, i))
     
 def task3(conn):
+    # TODO adjusting circle radius size based on crime type would be ideal, but whatever
     print('Reading data...\n')
 
     try:
@@ -141,7 +142,7 @@ def task3(conn):
         print(e)
         return
 
-    print('There is data from %i to %i.' % (min_year, max_year))
+    print('There is data from %i to %i.\n' % (min_year, max_year))
     print('The types of crimes are:')
     for crime in crime_types:
         print(crime)
@@ -151,18 +152,18 @@ def task3(conn):
     try:
         print('Enter start year (YYYY): \t', end='')
         start = int(input())
-        if start < min_year:
-            raise Exception("Error: No data before that year!")
+        if start < min_year or start > max_year:
+            raise Exception("Error: No data for that year!")
         print('Enter end year (YYYY): \t\t', end='')
         end = int(input())
-        if end > max_year:
-            raise Exception("Error: No data after that year!")
+        if end > max_year or end < min_year:
+            raise Exception("Error: No data for that year!")
         if start > end:
             raise Exception("Error: start year is greater than end year")
         print('Enter crime type: \t\t', end='')
         crime = input()
         if crime not in crime_types:
-            raise Exception("Error: Crime not recognized.\nEnter the crime exactly as it appears above.\nRemember, it's case sensitive!")
+            raise Exception("\nError: Crime not recognized.\nEnter the crime exactly as it appears above. It's case sensitive!")
         print('Enter number of neighbourhoods: ', end='')
         N = int(input())
         if N <= 0:
@@ -223,7 +224,7 @@ def task3(conn):
                 found = True
                 break
         if not found:
-            print("Warning: no coordinates found for %s, it won't be mapped" % (top[0][i]))
+            print("WARNING: no coordinates found for %s, it won't be mapped" % (top[0][i]))
         
     # Now map the results
     m = folium.Map(location=[results[0][1], results[0][2]], zoom_start=12)
