@@ -337,33 +337,26 @@ def task4(conn):
 
     # get the interval of years [a, b]
     print('Enter years for the interval [a, b]')
-    a = input('a: ')
-    b = input('b: ')
+    a = get_valid_year("Enter Start Year (YYYY): ")
+    b = get_valid_year("Enter End Year (YYYY): ", min = a)
 
-    # validate
-    if not ( isInt(a) and isInt(b) ):
-        print('Error: a,b must be integers')
-        return
+    while True:
+        # get N for top-n neighborhoods
+        print('Enter n to display the top-n neighborhoods')
+        n = input('n: ')
 
-    b = int(b)
-    a = int(a)
-    
-    if b < a:
-        print('Error: b cannot be less than a')
-        return
+        # validate
+        if not isInt(n):
+            print('Error: n must be an integer')
+            continue
+            
+        n = int(n)
 
-    # get N for top-n neighborhoods
-    print('Enter n to display the top-n neighborhoods')
-    n = input('n: ')
-
-    # validate
-    if not isInt(n):
-        print('Error: n must be an integer')
-        return
-    n = int(n)
-
-    if n < 0:
-        print('Error: n must be positive and non-zero')
+        if n < 0:
+            print('Error: n must be positive and non-zero')
+            continue
+        
+        break
 
     # read SQL
     try:
@@ -386,8 +379,8 @@ def task4(conn):
     # fetch top-n
     rows = []
     for row in cur:
-        #if len(rows) == n and row[3] != rows[n-1][3]:
-        #    break
+        if len(rows) == n and row[3] != rows[n-1][3]:
+            break
         rows.append(row)
 
     # read SQL
@@ -425,7 +418,7 @@ def task4(conn):
         folium.Circle(
             location=[ rows[i][1], rows[i][2] ],
             popup= "{} <br> {} <br> {}".format(rows[i][0], topCrimes[i], rows[i][3]),
-            radius=rows[i][3]*500,
+            radius=rows[i][3]*700,
             color='crimson',
             fill=True,
             fill_color='crimson'
@@ -477,7 +470,7 @@ def main():
         print('[1] Bar Plot of Monthly Crimes in Year Range')
         print('[2] Map the most and least populous neighbourhoods')
         print('[3] Map the occurences of a particular type of crime')
-        print('[4] Q4')
+        print('[4] Map the ratio of crimes and population, and top crime')
         print('[E] Exit')
         action = input("Enter your choice: ")
 
