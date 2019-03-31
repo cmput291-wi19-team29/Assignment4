@@ -117,10 +117,8 @@ def task4(conn):
 
     assert(len(topCrimes) == len(rows))
     if len(rows) == 0:
+        print("No data for that year range. Skipping map generations.")
         return
-
-    print(rows)
-    print(topCrimes)
 
     # Now plot the DataFrames on a map...
     m = folium.Map(location=[rows[0][1], rows[0][2]], zoom_start=12)
@@ -128,7 +126,7 @@ def task4(conn):
         folium.Circle(
             location=[ rows[i][1], rows[i][2] ],
             popup= "{} <br> {} <br> {}".format(rows[i][0], topCrimes[i], rows[i][3]),
-            radius=rows[i][3]*400,
+            radius=rows[i][3]*500,
             color='crimson',
             fill=True,
             fill_color='crimson'
